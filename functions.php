@@ -139,3 +139,149 @@ add_filter('nav_menu_link_attributes', function ($atts, $item, $args, $depth) {
   }
   return $atts;
 }, 10, 4);
+
+function register_festas_cpt()
+{
+  $labels = array(
+    'name' => 'Festas',
+    'singular_name' => 'Festa',
+    'add_new' => 'Adicionar Nova',
+    'add_new_item' => 'Adicionar Nova Festa',
+    'edit_item' => 'Editar Festa',
+    'new_item' => 'Nova Festa',
+    'view_item' => 'Ver Festa',
+    'search_items' => 'Buscar Festas',
+    'not_found' => 'Nenhuma festa encontrada',
+    'not_found_in_trash' => 'Nenhuma festa encontrada na lixeira',
+  );
+
+  $args = array(
+    'labels' => $labels,
+    'public' => true,
+    'has_archive' => true,
+    'menu_position' => 5,
+    'supports' => array('title'),
+    'show_in_rest' => false,
+  );
+
+  register_post_type('festa', $args);
+}
+add_action('init', 'register_festas_cpt');
+
+function add_festa_metaboxes()
+{
+  add_meta_box(
+    'festa_representante',
+    'Nome do Representante',
+    'festa_representante_callback',
+    'festa',
+    'normal',
+    'high'
+  );
+  add_meta_box(
+    'festa_email_representante',
+    'Email do Representante',
+    'email_representante_callback',
+    'festa',
+    'normal',
+    'high'
+  );
+}
+add_action('add_meta_boxes', 'add_festa_metaboxes');
+
+function festa_representante_callback($post)
+{
+  $value = get_post_meta($post->ID, '_festa_representante', true);
+  echo '<input type="text" name="festa_representante" value="' . esc_attr($value) . '" style="width:100%">';
+}
+
+function email_representante_callback($post)
+{
+  $value = get_post_meta($post->ID, '_email_representante', true); // Corrigido para '_email_representante'
+  echo '<input type="email" name="email_representante" value="' . esc_attr($value) . '" style="width:100%">';
+}
+
+function save_festa_representante($post_id)
+{
+  if (array_key_exists('festa_representante', $_POST)) {
+    update_post_meta(
+      $post_id,
+      '_festa_representante',
+      sanitize_text_field($_POST['festa_representante'])
+    );
+  }
+}
+add_action('save_post', 'save_festa_representante');
+
+function save_email_representante($post_id)
+{
+  if (array_key_exists('email_representante', $_POST)) {
+    update_post_meta(
+      $post_id,
+      '_email_representante', // Corrigido para '_email_representante'
+      sanitize_email($_POST['email_representante']) // Usar sanitize_email
+    );
+  }
+}
+add_action('save_post', 'save_email_representante');
+
+function add_festa_contrato_metabox()
+{
+  add_meta_box(
+    'festa_modelo_contrato',
+    'Modelo de Contrato',
+    'festa_modelo_contrato_callback',
+    'festa',
+    'normal',
+    'default'
+  );
+}
+add_action('add_meta_boxes', 'add_festa_contrato_metabox');
+
+$GLOBALS['contrato_padrao'] = '{festa_representante}, com email {email_representante} solicitou esta festa .... bla bla bla';
+
+function processar_contrato($conteudo, $post_id)
+{
+  // Obtenha os valores de meta
+  $representante = get_post_meta($post_id, '_festa_representante', true);
+  $email_representante = get_post_meta($post_id, '_email_representante', true);
+
+  // Substitua os campos no modelo
+  $conteudo = str_replace('{festa_representante}', $representante, $conteudo);
+  $conteudo = str_replace('{email_representante}', $email_representante, $conteudo);
+
+  return $conteudo;
+}
+
+function festa_modelo_contrato_callback($post)
+{
+  $valor_padrao = $GLOBALS['contrato_padrao'];
+  $conteudo = get_post_meta($post->ID, '_festa_modelo_contrato', true);
+
+  if ($post->post_status === 'auto-draft' || $post->post_status === 'draft') {
+    // Se for um novo post (ainda não salvo), mostra o modelo padrão não processado
+    $conteudo = $valor_padrao;
+  }
+
+  // Exibir o editor com o conteúdo atual (sem processar aqui para evitar substituição dupla)
+  wp_editor($conteudo, 'festa_modelo_contrato', [
+    'textarea_name' => 'festa_modelo_contrato',
+    'media_buttons' => false,
+    'textarea_rows' => 10,
+  ]);
+}
+
+function save_festa_modelo_contrato($post_id)
+{
+  if (array_key_exists('festa_modelo_contrato', $_POST)) {
+    // Processar o contrato ao salvar (substituir variáveis por valores reais)
+    $conteudo = processar_contrato($_POST['festa_modelo_contrato'], $post_id);
+
+    update_post_meta(
+      $post_id,
+      '_festa_modelo_contrato',
+      wp_kses_post($conteudo)
+    );
+  }
+}
+add_action('save_post', 'save_festa_modelo_contrato');
