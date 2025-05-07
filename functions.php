@@ -197,17 +197,37 @@ add_action('add_meta_boxes', function () {
 
 function festa_custom_fields_callback($post)
 {
-  // Nome do Representante
-  $nome_representante = get_post_meta($post->ID, '_festa_nome_representante', true);
-  echo '<p><label for="festa_nome_representante">Nome do Representante</label>';
-  echo '<input type="text" id="festa_nome_representante" name="festa_nome_representante" value="' . esc_attr($nome_representante) . '" style="width:100%;" /></p>';
+  $campos = [
+    'nome_representante' => ["type" => "text", "label" => 'Nome do Representante'],
+    'email_representante' => ["type" => "text", "label" => 'Email do Representante'],
+    'rg' => ["type" => "text", "label" => 'RG'],
+    'cpf' => ["type" => "text", "label" => 'CPF'],
+    'cep' => ["type" => "text", "label" => 'CEP'],
+    'cidade' => ["type" => "text", "label" => 'Cidade'],
+    'endereco' => ["type" => "text", "label" => 'Endereço'],
+    'numero' => ["type" => "text", "label" => 'Número'],
+    'bairro' => ["type" => "text", "label" => 'Bairro'],
+    'complemento' => ["type" => "text", "label" => 'Complemento'],
+    'data_evento' => ["type" => "date", "label" => 'Data do Evento'],
+    'horario_inicio' => ["type" => "time", "label" => 'Horário de Início'],
+    'horario_termino' => ["type" => "time", "label" => 'Horário de Término (no máximo até 21:30h)'],
+    'telefone' => ["type" => "text", "label" => 'Telefone'],
+    'qtd_adultos' => ["type" => "number", "label" => 'Quantidade de Adultos (mínimo 2)', "min" => 2],
+    'qtd_criancas' => ["type" => "number", "label" => 'Quantidade de Crianças (mínimo 10)', "min" => 10],
+  ];
 
-  // Email do Representante
-  $email_representante = get_post_meta($post->ID, '_festa_email_representante', true);
-  echo '<p><label for="festa_email_representante">Email do Representante</label>';
-  echo '<input type="email" id="festa_email_representante" name="festa_email_representante" value="' . esc_attr($email_representante) . '" style="width:100%;" /></p>';
 
-  // Modelo de Contrato
+  foreach ($campos as $key => $field) {
+    $valor = get_post_meta($post->ID, "_festa_$key", true);
+    $type = isset($field['type']) ? $field['type'] : 'text';
+    $label = $field['label'];
+
+    $min = isset($field['min']) ? 'min="' . $field['min'] . '"' : '';
+    $max = isset($field['max']) ? 'max="' . $field['max'] . '"' : '';
+    $maxlength = isset($field['maxlength']) ? 'maxlength="' . $field['maxlength'] . '"' : '';
+    echo '<p><label for="festa_' . $key . '">' . $label . '</label>';
+    echo "<input type='{$type}' id='festa_{$key}' name='festa_{$key}' value='" . esc_attr($valor) . "' style='width:100%;' {$min} {$max} {$maxlength} />";
+  }
   $modelos = get_posts(array(
     'post_type' => 'modelo_contrato',
     'posts_per_page' => -1,
@@ -224,16 +244,32 @@ function festa_custom_fields_callback($post)
 }
 
 add_action('save_post', function ($post_id) {
-  if (isset($_POST['festa_nome_representante'])) {
-    update_post_meta($post_id, '_festa_nome_representante', sanitize_text_field($_POST['festa_nome_representante']));
-  }
+  if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) return;
 
-  if (isset($_POST['festa_email_representante'])) {
-    update_post_meta($post_id, '_festa_email_representante', sanitize_email($_POST['festa_email_representante']));
-  }
+  $campos = [
+    'nome_representante',
+    'email_representante',
+    'rg',
+    'cpf',
+    'data_evento',
+    'horario_inicio',
+    'horario_termino',
+    'telefone',
+    'qtd_adultos',
+    'qtd_criancas',
+    'cep',
+    'endereco',
+    'cidade',
+    'numero',
+    'bairro',
+    'complemento',
+    'modelo_contrato'
+  ];
 
-  if (isset($_POST['festa_modelo_contrato'])) {
-    update_post_meta($post_id, '_festa_modelo_contrato', sanitize_text_field($_POST['festa_modelo_contrato']));
+  foreach ($campos as $campo) {
+    if (isset($_POST["festa_$campo"])) {
+      update_post_meta($post_id, "_festa_$campo", sanitize_text_field($_POST["festa_$campo"]));
+    }
   }
 });
 
@@ -249,6 +285,86 @@ add_action('edit_form_after_title', function ($post) {
       echo '</div>';
     }
   }
+});
+
+// add_action('init', function () {
+//   flush_rewrite_rules();
+// }, 99);
+
+
+// Adiciona o script de máscara no admin
+add_action('admin_footer', function () {
+  global $post_type;
+  if ($post_type === 'festa') : ?>
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        const rgInput = document.querySelector('#festa_rg');
+        const cpfInput = document.querySelector('#festa_cpf');
+
+        function maskRG(value) {
+          return value
+            .replace(/\D/g, '') // Remove tudo que não é número
+            .replace(/^(\d{2})(\d)/, '$1.$2') // Coloca ponto depois dos 2 primeiros dígitos
+            .replace(/^(\d{2})\.(\d{3})(\d)/, '$1.$2.$3') // Outro ponto
+            .replace(/\.(\d{3})(\d)/, '.$1-$2') // Hífen
+            .replace(/(-\d{1})\d+?$/, '$1'); // Limita ao padrão
+        }
+
+        function maskCPF(value) {
+          return value
+            .replace(/\D/g, '')
+            .replace(/(\d{3})(\d)/, '$1.$2')
+            .replace(/(\d{3})\.(\d{3})(\d)/, '$1.$2.$3')
+            .replace(/(\d{3})\.(\d{3})\.(\d{3})(\d)/, '$1.$2.$3-$4')
+            .replace(/(-\d{2})\d+?$/, '$1');
+        }
+
+        if (rgInput) {
+          rgInput.addEventListener('input', () => {
+            rgInput.value = maskRG(rgInput.value);
+          });
+        }
+
+        if (cpfInput) {
+          cpfInput.addEventListener('input', () => {
+            cpfInput.value = maskCPF(cpfInput.value);
+          });
+        }
+
+
+        const cepInput = document.querySelector('#festa_cep');
+
+        if (cepInput) {
+          cepInput.addEventListener('blur', function() {
+            const cep = cepInput.value.replace(/\D/g, '');
+
+            if (cep.length === 8) {
+              fetch(`https://viacep.com.br/ws/${cep}/json/`)
+                .then(response => response.json())
+                .then(data => {
+                  if (!data.erro) {
+                    const enderecoInput = document.querySelector('#festa_endereco');
+                    const bairroInput = document.querySelector('#festa_bairro');
+                    const cidadeInput = document.querySelector('#festa_cidade');
+                    const complementoInput = document.querySelector('#festa_complemento');
+
+                    if (enderecoInput) enderecoInput.value = data.logradouro || '';
+                    if (bairroInput) bairroInput.value = data.bairro || '';
+                    if (cidadeInput) cidadeInput.value = data.localidade || '';
+                    if (complementoInput) complementoInput.value = data.complemento || '';
+                  } else {
+                    alert('CEP não encontrado.');
+                  }
+                })
+                .catch(() => {
+                  alert('Erro ao consultar o CEP.');
+                });
+            }
+          });
+        }
+      });
+    </script>
+<?php endif;
 });
 
 // add_action('init', function () {
