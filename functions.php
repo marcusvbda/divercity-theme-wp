@@ -1,7 +1,12 @@
 <?php
 
-function my_theme_setup()
+function dd($var)
 {
+  var_dump($var);
+  exit;
+}
+
+add_action('after_setup_theme', function () {
   add_theme_support('title-tag');
   add_theme_support('post-thumbnails');
   add_theme_support('html5', ['search-form', 'comment-form', 'comment-list', 'gallery', 'caption']);
@@ -11,26 +16,22 @@ function my_theme_setup()
     'flex-height' => true,
     'flex-width'  => true,
   ]);
+  register_nav_menus(
+    array(
+      'main-menu' => __('Menu Principal'),
+    )
+  );
+});
 
-  register_nav_menus([
-    'main-menu' => 'Main Menu',
-  ]);
-}
-add_action('after_setup_theme', 'my_theme_setup');
-
-function my_theme_assets()
-{
+add_action('wp_enqueue_scripts', function () {
   wp_enqueue_style('my-theme-fonts', get_template_directory_uri() . '/fonts.css');
   wp_enqueue_style('my-theme-style', get_stylesheet_uri());
-}
-add_action('wp_enqueue_scripts', 'my_theme_assets');
+});
 
 add_filter('use_block_editor_for_post', '__return_false', 10);
 add_filter('use_block_editor_for_post_type', '__return_false', 10);
 
-function my_theme_customize_register($wp_customize)
-{
-  // Seção de Redes Sociais e Contato
+add_action('customize_register', function ($wp_customize) {
   $wp_customize->add_section('my_theme_contact_section', [
     'title'    => __('Contato, Redes Sociais e localização', 'my-theme'),
     'priority' => 40,
@@ -60,7 +61,6 @@ function my_theme_customize_register($wp_customize)
     'type'     => 'text',
   ]);
 
-  // Novo campo: Endereço
   $wp_customize->add_setting('my_theme_address', ['default' => '', 'transport' => 'refresh']);
   $wp_customize->add_control('my_theme_address_control', [
     'label'    => __('Endereço', 'my-theme'),
@@ -69,7 +69,6 @@ function my_theme_customize_register($wp_customize)
     'type'     => 'text',
   ]);
 
-  // Novo campo: Complemento
   $wp_customize->add_setting('my_theme_complement', ['default' => '', 'transport' => 'refresh']);
   $wp_customize->add_control('my_theme_complement_control', [
     'label'    => __('Complemento', 'my-theme'),
@@ -78,7 +77,6 @@ function my_theme_customize_register($wp_customize)
     'type'     => 'text',
   ]);
 
-  // Seção de Horário de Funcionamento
   $wp_customize->add_section('my_theme_hours_section', [
     'title'    => __('Horário de Funcionamento', 'my-theme'),
     'priority' => 45,
@@ -99,32 +97,71 @@ function my_theme_customize_register($wp_customize)
     'settings' => 'my_theme_hours_sunday',
     'type'     => 'text',
   ]);
-}
-add_action('customize_register', 'my_theme_customize_register');
+});
 
-function my_remove_content_editor()
-{
+add_action('init', function () {
   remove_post_type_support('page', 'editor');
-}
-add_action('init', 'my_remove_content_editor');
 
-function dd($var)
-{
-  var_dump($var);
-  exit;
-}
-
-function register_my_menus()
-{
-  register_nav_menus(
-    array(
-      'main-menu' => __('Menu Principal'),
-    )
+  $labelsFesta = array(
+    'name' => 'Festas',
+    'singular_name' => 'Festa',
+    'add_new' => 'Adicionar Nova',
+    'add_new_item' => 'Adicionar Nova Festa',
+    'edit_item' => 'Editar Festa',
+    'new_item' => 'Nova Festa',
+    'view_item' => 'Ver Festa',
+    'search_items' => 'Buscar Festas',
+    'not_found' => 'Nenhuma festa encontrada',
+    'not_found_in_trash' => 'Nenhuma festa encontrada na lixeira',
   );
-}
-add_action('after_setup_theme', 'register_my_menus');
 
-add_filter('show_admin_bar', '__return_false');
+  $argsFesta = array(
+    'labels' => $labelsFesta,
+    'public' => true,
+    'has_archive' => true,
+    'menu_position' => 5,
+    'supports' => array('title'),
+    'show_in_rest' => false,
+    'rewrite' => [
+      'slug' => 'festa',
+      'with_front' => false,
+    ],
+    'rewrite' => [
+      'slug' => 'festa',
+      'with_front' => false,
+    ],
+  );
+
+  register_post_type('festa', $argsFesta);
+
+  $labelsModelos = array(
+    'name' => 'Modelos de Contrato',
+    'singular_name' => 'Modelo de Contrato',
+    'add_new' => 'Adicionar Novo',
+    'add_new_item' => 'Adicionar Novo Modelo',
+    'edit_item' => 'Editar Modelo',
+    'new_item' => 'Novo Modelo',
+    'view_item' => 'Ver Modelo',
+    'search_items' => 'Buscar Modelos',
+    'not_found' => 'Nenhum modelo encontrado',
+    'not_found_in_trash' => 'Nenhum modelo encontrado na lixeira',
+    'rewrite' => [
+      'slug' => 'modelo-contrato',
+      'with_front' => false,
+    ],
+  );
+
+  $argsModelos = array(
+    'labels' => $labelsModelos,
+    'public' => true,
+    'has_archive' => true,
+    'menu_position' => 6,
+    'supports' => array('title', 'editor'),
+    'show_in_rest' => true,
+  );
+
+  register_post_type('modelo_contrato', $argsModelos);
+});
 
 add_filter('nav_menu_css_class', function ($classes, $item, $args, $depth) {
   if (!empty($args->li_class)) {
@@ -140,148 +177,80 @@ add_filter('nav_menu_link_attributes', function ($atts, $item, $args, $depth) {
   return $atts;
 }, 10, 4);
 
-function register_festas_cpt()
-{
-  $labels = array(
-    'name' => 'Festas',
-    'singular_name' => 'Festa',
-    'add_new' => 'Adicionar Nova',
-    'add_new_item' => 'Adicionar Nova Festa',
-    'edit_item' => 'Editar Festa',
-    'new_item' => 'Nova Festa',
-    'view_item' => 'Ver Festa',
-    'search_items' => 'Buscar Festas',
-    'not_found' => 'Nenhuma festa encontrada',
-    'not_found_in_trash' => 'Nenhuma festa encontrada na lixeira',
-  );
+add_action('add_meta_boxes', function () {
+  remove_meta_box('wpseo_meta', 'festa', 'normal');
+  remove_meta_box('litespeed_meta_boxes', 'festa', 'side');
+  remove_meta_box('wpseo_meta', 'modelo_contrato', 'normal');
+  remove_meta_box('litespeed_meta_boxes', 'modelo_contrato', 'side');
+}, 99);
 
-  $args = array(
-    'labels' => $labels,
-    'public' => true,
-    'has_archive' => true,
-    'menu_position' => 5,
-    'supports' => array('title'),
-    'show_in_rest' => false,
-  );
-
-  register_post_type('festa', $args);
-}
-add_action('init', 'register_festas_cpt');
-
-function add_festa_metaboxes()
-{
+add_action('add_meta_boxes', function () {
   add_meta_box(
-    'festa_representante',
-    'Nome do Representante',
-    'festa_representante_callback',
-    'festa',
-    'normal',
-    'high'
-  );
-  add_meta_box(
-    'festa_email_representante',
-    'Email do Representante',
-    'email_representante_callback',
-    'festa',
-    'normal',
-    'high'
-  );
-}
-add_action('add_meta_boxes', 'add_festa_metaboxes');
-
-function festa_representante_callback($post)
-{
-  $value = get_post_meta($post->ID, '_festa_representante', true);
-  echo '<input type="text" name="festa_representante" value="' . esc_attr($value) . '" style="width:100%">';
-}
-
-function email_representante_callback($post)
-{
-  $value = get_post_meta($post->ID, '_email_representante', true); // Corrigido para '_email_representante'
-  echo '<input type="email" name="email_representante" value="' . esc_attr($value) . '" style="width:100%">';
-}
-
-function save_festa_representante($post_id)
-{
-  if (array_key_exists('festa_representante', $_POST)) {
-    update_post_meta(
-      $post_id,
-      '_festa_representante',
-      sanitize_text_field($_POST['festa_representante'])
-    );
-  }
-}
-add_action('save_post', 'save_festa_representante');
-
-function save_email_representante($post_id)
-{
-  if (array_key_exists('email_representante', $_POST)) {
-    update_post_meta(
-      $post_id,
-      '_email_representante', // Corrigido para '_email_representante'
-      sanitize_email($_POST['email_representante']) // Usar sanitize_email
-    );
-  }
-}
-add_action('save_post', 'save_email_representante');
-
-function add_festa_contrato_metabox()
-{
-  add_meta_box(
-    'festa_modelo_contrato',
-    'Modelo de Contrato',
-    'festa_modelo_contrato_callback',
+    'festa_custom_fields',
+    'Campos de Festa',
+    'festa_custom_fields_callback',
     'festa',
     'normal',
     'default'
   );
-}
-add_action('add_meta_boxes', 'add_festa_contrato_metabox');
+});
 
-$GLOBALS['contrato_padrao'] = '{festa_representante}, com email {email_representante} solicitou esta festa .... bla bla bla';
-
-function processar_contrato($conteudo, $post_id)
+function festa_custom_fields_callback($post)
 {
-  // Obtenha os valores de meta
-  $representante = get_post_meta($post_id, '_festa_representante', true);
-  $email_representante = get_post_meta($post_id, '_email_representante', true);
+  // Nome do Representante
+  $nome_representante = get_post_meta($post->ID, '_festa_nome_representante', true);
+  echo '<p><label for="festa_nome_representante">Nome do Representante</label>';
+  echo '<input type="text" id="festa_nome_representante" name="festa_nome_representante" value="' . esc_attr($nome_representante) . '" style="width:100%;" /></p>';
 
-  // Substitua os campos no modelo
-  $conteudo = str_replace('{festa_representante}', $representante, $conteudo);
-  $conteudo = str_replace('{email_representante}', $email_representante, $conteudo);
+  // Email do Representante
+  $email_representante = get_post_meta($post->ID, '_festa_email_representante', true);
+  echo '<p><label for="festa_email_representante">Email do Representante</label>';
+  echo '<input type="email" id="festa_email_representante" name="festa_email_representante" value="' . esc_attr($email_representante) . '" style="width:100%;" /></p>';
 
-  return $conteudo;
+  // Modelo de Contrato
+  $modelos = get_posts(array(
+    'post_type' => 'modelo_contrato',
+    'posts_per_page' => -1,
+  ));
+  $selected_modelo = get_post_meta($post->ID, '_festa_modelo_contrato', true);
+  echo '<p><label for="festa_modelo_contrato">Modelo de Contrato</label>';
+  echo '<select name="festa_modelo_contrato" style="width:100%;">';
+  echo '<option value="">Selecione um modelo de contrato</option>';
+  foreach ($modelos as $modelo) {
+    $selected = ($selected_modelo == $modelo->ID) ? 'selected' : '';
+    echo '<option value="' . $modelo->ID . '" ' . $selected . '>' . $modelo->post_title . '</option>';
+  }
+  echo '</select></p>';
 }
 
-function festa_modelo_contrato_callback($post)
-{
-  $valor_padrao = $GLOBALS['contrato_padrao'];
-  $conteudo = get_post_meta($post->ID, '_festa_modelo_contrato', true);
-
-  if ($post->post_status === 'auto-draft' || $post->post_status === 'draft') {
-    // Se for um novo post (ainda não salvo), mostra o modelo padrão não processado
-    $conteudo = $valor_padrao;
+add_action('save_post', function ($post_id) {
+  if (isset($_POST['festa_nome_representante'])) {
+    update_post_meta($post_id, '_festa_nome_representante', sanitize_text_field($_POST['festa_nome_representante']));
   }
 
-  // Exibir o editor com o conteúdo atual (sem processar aqui para evitar substituição dupla)
-  wp_editor($conteudo, 'festa_modelo_contrato', [
-    'textarea_name' => 'festa_modelo_contrato',
-    'media_buttons' => false,
-    'textarea_rows' => 10,
-  ]);
-}
-
-function save_festa_modelo_contrato($post_id)
-{
-  if (array_key_exists('festa_modelo_contrato', $_POST)) {
-    // Processar o contrato ao salvar (substituir variáveis por valores reais)
-    $conteudo = processar_contrato($_POST['festa_modelo_contrato'], $post_id);
-
-    update_post_meta(
-      $post_id,
-      '_festa_modelo_contrato',
-      wp_kses_post($conteudo)
-    );
+  if (isset($_POST['festa_email_representante'])) {
+    update_post_meta($post_id, '_festa_email_representante', sanitize_email($_POST['festa_email_representante']));
   }
-}
-add_action('save_post', 'save_festa_modelo_contrato');
+
+  if (isset($_POST['festa_modelo_contrato'])) {
+    update_post_meta($post_id, '_festa_modelo_contrato', sanitize_text_field($_POST['festa_modelo_contrato']));
+  }
+});
+
+add_action('edit_form_after_title', function ($post) {
+  if ($post->post_type === 'festa') {
+    $modelo_contrato_id = get_post_meta($post->ID, '_festa_modelo_contrato', true);
+    if (!$modelo_contrato_id) {
+      echo "";
+    } else {
+      $url = get_template_directory_uri() . '/admin/script-download-contrato.php?festa_id=' . $post->ID;
+      echo '<div style="margin-top:10px; padding:10px; background:#f1f1f1; border:1px solid #ccc;">';
+      echo '<a href="' . esc_url($url) . '" target="_blank" style="font-weight:bold; text-decoration:none;">⬇️ Baixar contrato preenchido com dados do cadastro</a>';
+      echo '</div>';
+    }
+  }
+});
+
+// add_action('init', function () {
+//   flush_rewrite_rules();
+// }, 99);
