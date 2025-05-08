@@ -30,9 +30,16 @@ preg_match_all('/\{(.*?)\}/', $content, $matches);
 $values = $matches[1];
 
 foreach ($values as $value) {
-    $index = "_festa_$value";
+    $index = "_$value";
     $indexValue = get_post_meta($festa->ID, $index, true);
     $content = str_replace('{' . $value . '}', $indexValue, $content);
 }
 
-echo $content;
+?>
+<html>
+
+<body>
+    <?php echo nl2br($content); ?>
+</body>
+
+</html>
