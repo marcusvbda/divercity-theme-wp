@@ -15,6 +15,7 @@ $complement = get_theme_mod('my_theme_complement');
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="<?php echo get_template_directory_uri(); ?>/assets/css/tailwind/output.css">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script defer src="<?php echo get_template_directory_uri(); ?>/assets/js/alpine.js"></script>
   <?php wp_head(); ?>
 </head>
 

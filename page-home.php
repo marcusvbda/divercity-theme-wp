@@ -56,18 +56,21 @@ $typingText = array_map(function ($item) {
         <section class="first-frame relative -top-[60px]">
             <div class="max-w-screen-xl mx-auto px-4 flex flex-col items-center md:flex-row gap-4 md:px-0">
                 <?php foreach ($spinCards as $card) : ?>
-                    <div class="group relative w-full md:w-4/12 h-[200px] bg-white rounded-md shadow-md p-4 overflow-hidden">
-                        <div class="absolute inset-0 flex flex-col items-center justify-center transition-opacity duration-300 group-hover:opacity-0">
-                            <h4 class="text-xl font-bold mb-6 text-blue-900 px-4"><?php echo $card['titulo']; ?></h4>
-                            <span class="text-sm opacity-50 text-center text-blue-900 px-4"><?php echo $card['descricao']; ?></span>
-                        </div>
-                        <div class="absolute inset-0 flex flex-col items-center justify-center transition-opacity duration-300 opacity-0 group-hover:opacity-100" style="background-color: <?php echo $card['cor_do_verso']; ?>;">
-                            <div class="text-center text-white p-4 text-sm px-4">
-                                <?php echo $card['texto_verso']; ?>
+                    <div class="flip-card w-full md:w-4/12 h-[200px] ">
+                        <div class="flip-card-inner">
+                            <div class="flip-card-front bg-white">
+                                <div class="absolute inset-0 flex flex-col items-center justify-center transition-opacity duration-300 group-hover:opacity-0">
+                                    <h4 class="text-xl font-bold mb-6 text-blue-900 px-4"><?php echo $card['titulo']; ?></h4>
+                                    <span class="text-sm opacity-50 text-center text-blue-900 px-4"><?php echo $card['descricao']; ?></span>
+                                </div>
+                            </div>
+                            <div class="flip-card-back flex items-center justify-center" style="background-color: <?php echo $card['cor_do_verso']; ?>;">
+                                <div class="text-center text-white p-4 px-4">
+                                    <?php echo $card['texto_verso']; ?>
+                                </div>
                             </div>
                         </div>
                     </div>
-
                 <?php endforeach; ?>
             </div>
         </section>
