@@ -190,18 +190,5 @@ $typingText = array_map(function ($item) {
         </section>
     </main>
 </body>
-<script>
-    document.addEventListener("DOMContentLoaded", function() {
-        const nav = document.querySelector('.main-navigation');
-
-        window.addEventListener('scroll', function() {
-            if (window.scrollY > 1000) {
-                nav.classList.add('scrolled');
-            } else {
-                nav.classList.remove('scrolled');
-            }
-        });
-    });
-</script>
 
 <?php get_footer(); ?>

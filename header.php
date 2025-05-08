@@ -46,12 +46,12 @@ $complement = get_theme_mod('my_theme_complement');
         aria-controls="navbar-solid-bg"
         aria-expanded="false">
         <span class="sr-only">Open main menu</span>
-        <svg class="size-8 icon-open" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 17 14">
+        <svg class="size-8 icon-open text-[var(--primary)]" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 17 14">
           <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 1h15M1 7h15M1 13h15" />
         </svg>
         <div id="menu-overlay" class="fixed inset-0 bg-black/50 z-10 icon-close">
           <svg
-            class="size-10 fixed right-5 top-10 z-10"
+            class="size-10 fixed right-5 top-10 z-10 text-[var(--primary)]"
             aria-hidden="true"
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
@@ -66,19 +66,6 @@ $complement = get_theme_mod('my_theme_complement');
         </div>
 
       </button>
-      <svg
-        class="size-8 hidden icon-close"
-        aria-hidden="true"
-        xmlns="http://www.w3.org/2000/svg"
-        fill="none"
-        viewBox="0 0 24 24">
-        <path
-          stroke="currentColor"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          stroke-width="2"
-          d="M6 18L18 6M6 6l12 12" />
-      </svg>
       <div
         id="navbar-solid-bg"
         class="hidden md:block desktop-menu bg-white md:bg-transparent fixed md:relative top-0 md:top-unset w-[80%] md:w-auto left-0 md:left-unset h-[100vh] z-2 md:z-auto md:h-auto">

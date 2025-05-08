@@ -51,10 +51,6 @@ header {
 
         #menu-default-menu {
 
-            .menu-hamburger {
-                color: black;
-            }
-
             .menu-item {
                 align-items: center;
                 display: flex;
@@ -130,10 +126,6 @@ html {
             position: absolute;
             width: 100%;
             border: none;
-
-            .menu-hamburger {
-                color: white !important;
-            }
 
             .desktop-menu {
 
