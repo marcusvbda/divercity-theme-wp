@@ -90,7 +90,7 @@ if (isset($_POST['enviar_festa'])) {
                     echo "<input $required class='w-full border border-gray-300 rounded-md p-2' type='{$type}' id='festa_{$key}' name='festa_{$key}' value='" . esc_attr($valor) . "' style='width:100%;' {$min} {$max} {$maxlength} />";
                     ?>
                 <?php endforeach; ?>
-                <input type="submit" name="enviar_festa" value="Enviar Festa"
+                <input type="submit" name="enviar_festa" value="Enviar Informações"
                     class="bg-blue-900 text-white p-2 rounded-md cursor-pointer hover:bg-blue-800 transition mt-10">
             </form>
         <?php endif; ?>
