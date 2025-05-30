@@ -9,8 +9,7 @@ get_header();
         if (have_posts()) :
             while (have_posts()) : the_post(); ?>
                 <article class="mb-10">
-                    <h2 class="text-2xl font-bold mb-2"><?php the_title(); ?></h2>
-                    <div class="prose max-w-none">
+                    <div class="prose max-w-none whitespace-pre-wrap">
                         <?php the_content(); ?>
                     </div>
                 </article>

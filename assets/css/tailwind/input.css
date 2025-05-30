@@ -221,3 +221,8 @@ footer {
         transform: rotateY(180deg);
     }
 }
+
+.prose {
+    white-space: pre-wrap;
+    /* preserva espaços e quebras de linha */
+}
